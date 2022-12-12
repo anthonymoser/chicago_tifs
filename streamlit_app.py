@@ -74,7 +74,7 @@ if data_url:
         table.dataframe(ef)
         field_name = selected_field 
         # ef['hover_text'] = ''
-        ef['hover_text'] = ef[tif_name_field]
+        ef['hover_text'] = ef['hover_text'] = ef[tif_name_field].apply(lambda x: x if pd.notna(x) else "")
 
         # Geographic Map
         fig = go.Figure(

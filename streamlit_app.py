@@ -15,20 +15,21 @@ def google_sheet(sheet_url:str)->str:
 
 # Add title and header
 st.title("Chicago TIF Districts")
-st.write("A PublicDataTools project by Anthony Moser")
-# instructions = st.sidebar.checkbox(label="Show instructions", value=1)
-# if instructions:
-#     st.markdown("""
-#         This is a tool for making maps of Chicago TIF data. Paste in the URL of a publicly viewable Google Sheet
-#     """)
+st.markdown("*A PublicDataTools project by Anthony Moser with TIF data by Civic Lab*")
 
 demo_url = "https://docs.google.com/spreadsheets/d/1sJVp7PlCfgfn77mAQs9gLw8Yom_50Tpbk4spWUDGp-w/edit#gid=0"
 
-about = st.sidebar.button("About This Tool")
-if about:
-    st.markdown(f"This tool can visualize any Chicago TIF data as long as it's in a publicly accessible Google sheet  " 
-            + " and contains a field with the TIF number. Just paste the URL here and select the field with tif_number in it.  "
-            + " Make sure the numeric data doesn't have any extra formatting like commas or $ signs. Here's [an example]({demo_url})")
+
+col1, col2 = st.columns(2)  
+col1.image('assets/CL-TIP logo banner.JPG')
+col2.markdown("""
+Tax Increment Financing Districts (TIFs) are created and administered by the City of Chicago in the name of economic development.\n 
+The CivicLab’s [TIF Illumination Project](http://www.tifreports.com) has been investigating and exposing the hyper-local harms of
+TIFs on our communities since 2013. For more information: info@civiclab.us
+""")
+st.markdown("This tool can visualize any Chicago TIF data as long as it's in a publicly accessible Google sheet  " 
+        + " and contains a field with the TIF number. Just paste the URL here and select the field with tif_number in it.  "
+        + f" Make sure the numeric data doesn't have any extra formatting like commas or $ signs. Here's [an example]({demo_url})")
 
 data_url = st.sidebar.text_input("Google Sheet URL", key="sheet_url", value=demo_url)
 data_fields = []
@@ -52,7 +53,7 @@ if data_url:
             tif_name_index = lowercase.index(f)
         
 
-    # col1, col2 = st.columns(2)    
+  
     tif_number_field = st.sidebar.selectbox(label="TIF Number field", options = fields, index = tif_number_index)
     tif_name_field = st.sidebar.selectbox(label="TIF Name field", options = fields, index = tif_name_index)
     color_scale = st.sidebar.selectbox('Color scale', options=named_colorscales, index=1)
@@ -65,7 +66,7 @@ if data_url:
     indexed = True
     
     selected_field = st.selectbox(label="Column to visualize:", options=metrics)
-
+    # ef = ef[(ef[tif_number_field].notna()) & (ef[ef[tif_name_field].notna()])]
     if query:
         ef = ef.query(query)
         table.dataframe(ef)
@@ -74,7 +75,7 @@ if data_url:
         table.dataframe(ef)
         field_name = selected_field 
         # ef['hover_text'] = ''
-        ef['hover_text'] = ef['hover_text'] = ef[tif_name_field].apply(lambda x: x if pd.notna(x) else "")
+        ef['hover_text'] = ef.apply(lambda row: f"${row[selected_field]:,.0f} <br>" + row[tif_name_field] if pd.notna(row[selected_field]) else f'{row[tif_name_field]} No data', axis = 1)
 
         # Geographic Map
         fig = go.Figure(
@@ -85,6 +86,8 @@ if data_url:
                 z=ef[selected_field],
                 colorscale=color_scale,
                 text = ef['hover_text'],
+                hoverinfo='text',
+                
                 # zmin=1,
                 # zmax=50,
                 marker_opacity=0.5,

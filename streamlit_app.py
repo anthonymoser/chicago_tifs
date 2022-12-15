@@ -5,6 +5,7 @@ import json
 import plotly.express as px
 named_colorscales = list(px.colors.named_colorscales())
 
+st.set_page_config(page_title="Chicago TIFs")
 with open("data/tif_boundaries_id_fixed.geojson") as data:
     geo = json.load(data)
 
